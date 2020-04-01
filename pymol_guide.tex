@@ -1,0 +1,279 @@
+\documentclass[aspectratio=169]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{listings,lstautogobble}
+\usepackage{bookmark}
+\usetheme{Pittsburgh}
+
+\lstset{basicstyle=\ttfamily\footnotesize,
+        moredelim=**[is][\color{blue}]{@}{@},
+        autogobble=true,
+        breaklines=true}
+
+\beamertemplatenavigationsymbolsempty
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{frametitle}[default][left]
+%\setbeamersize{text margin left=0.5cm,text margin right=0cm} 
+
+\title{Han Li Lab PyMol Guide}
+\institute{University of California, Irvine}
+
+\begin{document}
+
+\begin{frame}[noframenumbering,plain]
+    \maketitle
+\end{frame}
+
+\begin{frame}
+    \frametitle{Table of Contents}
+        \tableofcontents
+\end{frame}
+
+\section{Object Selection}
+
+\begin{frame}[fragile]
+\frametitle{Selection Shortcuts}
+    \begin{lstlisting}
+        sel <variable_name>, <object>          @# selection template@
+        remove solv                            @# remove solvent@
+        remove inorg                           @# remove ions@
+        remove not chain <chain>               @# remove other chains@
+        sel <ligand>, org                      @# select all ligands@
+        sel <protein>, poly                    @# select all protein atoms@
+        sel <target>, rep sticks               @# select by representation@
+        sel <residue>, resi <residue number>   @# select residue by number@
+        sel <residue>, resn <residue name>     @# select object by residue name@
+        sel <atom>, name <atom name>           @# select atom by atom name@
+        reset                                  @# reset camera origin@
+
+        @# Examples@
+        @# selects residues 23, 54, 55, 56, 57, 99@
+        sel target_residues, resi 23+54-57+99    
+
+        @# selects ligand with 3-letter code NAD from chain A@ 
+        sel target_ligand, resn NAD and chain A
+
+    \end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Displaying Binding Pocket Interactions}
+    \begin{columns}
+        \begin{column}{0.50\textwidth}
+            \includegraphics[scale=0.11]{images/ldh_pocket.png}
+        \end{column}
+        \begin{column}{0.45\textwidth}
+           \begin{lstlisting}[mathescape=true]
+                @# all residues with any atom around 3.5 angstrom@
+                sel pocket, br. org around 3.5
+                show sticks, pocket
+                color cyan, pocket
+                util.cnc
+                dist hbonds, org, poly, mode=2
+                hide labels
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\section{Structure Manipulation}
+
+\begin{frame}[fragile]
+\frametitle{Alignment}
+    \begin{lstlisting}
+    @# 1 to 1 alignment@
+    fetch 1j49; fetch 4e5n
+    remove solv; remove not chain A; remove inorg
+    align 1j49, 4e5n  @# fits 1j49 onto 4e5n@
+    reset
+
+    @# multiple to 1 alignment@
+    fetch 1j49; fetch 4e5n; fetch 6ih4
+    remove solv; remove not chain A; remove inorg
+    alignto 4e5n  @# align all to 4e5n@
+    reset
+    \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Ligand Transfer}
+    \begin{lstlisting}
+    fetch 1qi1; fetch 1qi6         @# 1qi1 gapn with nadp, 1qi6 apo gapn@
+    remove not chain A
+    remove solv
+    remove inorg
+    align 1qi1, 1qi6               @# align binding pockets@
+    extract nadp, resn NAP
+    sel 1qi6_nadp, 1qi6 + nadp
+    save 1qi6_nadp.pdb, 1qi6_nadp  @# or save with File -> Export Molecule@
+    @# type pwd to see the default directory the file is saved to@
+    \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Mutagenesis}
+
+Follow instructions from the PyMol website
+\href{https://pymolwiki.org/index.php/Mutagenesis}{\color{blue}{https://pymolwiki.org/index.php/Mutagenesis}}
+
+\vspace*{0.5cm}
+\begin{enumerate}
+    \item{Wizard $\rightarrow$ Mutagenesis $\rightarrow$ Protein}
+    \item{Select target residue by clicking}
+    \item{Select mutation residue in Mutagenesis box}
+    \item{Examine rotamers with arrows on bottom right}
+    \item{Apply to save}
+\end{enumerate}
+
+\end{frame}
+
+\section{Publication Quality Images}
+\begin{frame}[fragile]
+\frametitle{General Settings}
+    \begin{lstlisting}
+        bg white                       @# change background color@
+        set ray_opaque_background, 1   @# make background solid@
+        set ray_shadow, 0              @# turn off shadows@
+        set antialias, 2               @# smooth edges@
+        set cartoon_fancy_helices, 1   @# adds ridges to helix edges@
+        util.cnc                       @# colors oxygen and nitrogen atoms@
+        ray <width>                    @# ray and scale resolution@
+
+        @# Recommended settings@
+        set ray_trace_mode, 3          @# optional neon colors and outline@
+        color white, poly
+        color green, org
+        color cyan, poly and rep sticks
+
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Showing Backbone Atoms}
+    \begin{columns}
+        \begin{column}{0.50\textwidth}
+            \includegraphics[scale=0.10]{images/side_chain_helper.png}
+        \end{column}
+        \begin{column}{0.50\textwidth}
+            \includegraphics[scale=0.10]{images/side_chain_helper_off.png}
+        \end{column}
+    \end{columns}
+    \begin{lstlisting}[xleftmargin=0.2\textwidth]
+    fetch 1j49
+    [...]  @# clean up@
+    dist hbonds, org, resi 234, mode=2
+    hide labels
+    set cartoon_side_chain_helper, 0, resi 234
+    \end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Glucose Dehydrogenase}
+    \begin{columns}
+        \begin{column}{0.50\textwidth}
+            \includegraphics[scale=0.12]{images/gludh_copy.png}
+        \end{column}
+        \begin{column}{0.50\textwidth}
+            \begin{lstlisting}
+                load gludh_80_nmn.pdb
+                bg white
+                set ray_opaque_background, 1
+                set cartoon_fancy_helices, 1
+                set ray_shadow, 0
+                color white, poly
+                color orange, org
+                show cart
+                show surf
+                set transparency, 0.7
+                sel mutations, i. 93+39+195+17 and name ca
+                show spheres, mutations
+                color deeppurple, rep spheres
+                set sphere_scale, 0.5
+                util.cnc org
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Lactate Dehydrogenase}
+    \begin{columns}
+        \begin{column}{0.50\textwidth}
+            \includegraphics[scale=0.10]{images/1j49_ade.png}
+        \end{column}
+        \begin{column}{0.50\textwidth}
+            \vspace*{-0.5cm}
+            \begin{lstlisting}
+                fetch 1j49 
+                bg white; color white, poly
+                remove chain A; remove inorg; remove solv
+                set ray_opaque_background, 1
+                set ray_trace_mode, 3
+                set cartoon_transparency, 0.3
+                color green, org
+                show lines, br. org around 3.5
+                color silver, rep lines
+                sel spec_loop, resi 176-178
+                show sticks, spec_loop
+                color cyan, resi 176
+                color violet, resi 177
+                color lightorange, resi 178
+                dist hbonds, resi 176, all, mode=2
+                hide labels; show lines, resi 154
+                set cartoon_side_chain_helper, 0, resi 154+177+178
+                util.cnc
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Nitrogenase Iron Protein}
+    \begin{columns}
+        \begin{column}{0.50\textwidth}
+            \includegraphics[scale=0.105]{images/6nzj_3.png}
+        \end{column}
+        \begin{column}{0.50\textwidth}
+            \begin{lstlisting}
+                fetch 6nzj
+                bg white 
+                color lightblue, chain A
+                color palegreen, chain B
+                util.cnc
+                remove resn SO4; remove solv
+                set ray_opaque_background, 1
+                @# outline with regular colors@
+                set ray_trace_mode, 1  
+                set cartoon_transparency, 0.7
+                show sticks, inorg
+                set sphere_scale, 0.4
+                set cartoon_transparency, 0.5
+                show sticks, br. inorg around 3.5
+                hide sticks, resi 96
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\section{Rotation Movies}
+\begin{frame}[fragile]
+    \frametitle{Rotation Movies}
+
+    Common options under Movie $\rightarrow$ Program 
+
+    \vspace*{1.5cm}
+    GluDH
+
+    \begin{lstlisting}
+    movie.add_roll(16.0, axis=`y', start=1)
+    File -> Export Movie
+    \end{lstlisting}
+
+    \href{https://youtu.be/eaRJjZ0OLRs}{\color{blue}{https://youtu.be/eaRJjZ0OLRs}}
+\end{frame}
+
+\end{document}
