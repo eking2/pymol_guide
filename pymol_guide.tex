@@ -259,6 +259,37 @@ Follow instructions from the PyMol website
     \end{columns}
 \end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Phosphite Dehydrogenase Electrostatics}
+    \begin{columns}
+        \begin{column}{0.50\textwidth}
+            \includegraphics[scale=0.105]{images/4e5m_electro.png}
+            \begin{center}
+            \color{blue}{Positive} \, \color{red}{Negative}
+            \end{center}
+        \end{column}
+        \begin{column}{0.50\textwidth}
+            \vspace*{-0.2cm}
+            \begin{lstlisting}
+                fetch 4e5m
+                bg white 
+                set ray_opaque_background, 1
+                remove not chain A
+                remove inorg; remove solv
+                color white, poly
+                show lines, br. org around 3.5
+                util.cnc
+                set ray_trace_mode, 1  
+                set cartoon_transparency, 0.8
+                @# only outline backbone around ligand@
+                set cartoon_transparency, 0, br. org around 5
+                @# Plugins -> APBS Electrostatics -> Run@
+                set transparency, 0.7
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+\end{frame}
+
 \section{Rotation Movies}
 \begin{frame}[fragile]
     \frametitle{Rotation Movies}
